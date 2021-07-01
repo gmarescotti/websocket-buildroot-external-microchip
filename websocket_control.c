@@ -332,53 +332,96 @@ void update_start_script()
   sz = write(fd, str, strlen(str));
   close(fd);
 }
+
+/**
+ * websocket syntax:
+ * connect=connect&ssid=FASTWEB&password=topsecret&dhcp=checked&ipaddress=192.168.1.1&netmask=255.255.255.0&gateway=192.168.1.0;
+ */
 void CommandParser(char *pc) {
 
-   char s[] = "connect=connect&login=";
-   char s1[] = "&password=";
-   char s2[] = "&device-name=";
-   char *token,*p;
-   char ssid[32];
-   char psk[64];
-   char dev[32];
-   char a='"';
+    char s[] = "connect=connect&ssid=";
+    char s1[] = "&password=";
+    char s2[] = "&dhcp=";
+    char s3[] = "&ipaddress=";
+    char s4[] = "&netmask=";
+    char s5[] = "&gateway=";
+
+    char *token, *p;
+    char ssid[32];
+    char psk[64];
+    char dhcp[32];
+    char ipaddress[32];
+    char netmask[32];
+    char gateway[32];
+    char a='"';
 
     memset(ssid,0,32);
     memset(psk,0,64);
-    memset(dev,0,32);
+    memset(dhcp,0,32);
 
-   /* get the first token */
-   //token = strtok(str, s);
-   p= str_map(pc, s);
-  // printf( " p=%s\n", p );
-   token = strchr(p,'&');
-   strncpy(ssid,&a,1);                //storing special character " for wpa_supplicant formating
-   strncpy(ssid+1,p,token-p);
-   strncpy(ssid+(token-p)+1,&a,1);  //storing special character " for wpa_supplicant formating  
-   ssid[(token-p)+2]='\0';
+    p= str_map(pc, s);
+    token = strchr(p, '&');
+    strncpy(ssid, &a, 1);                   //storing special character " for wpa_supplicant formating
+    strncpy(ssid+1, p, token-p);
+    strncpy(ssid+(token-p)+1, &a, 1);       //storing special character " for wpa_supplicant formating
+    ssid[(token-p)+2]='\0';
 
-   printf( " ssid=%s\n", ssid );
+    printf( " ssid=%s\n", ssid );
 
-   p=str_map(token, s1);
-   token = strchr(p,'&');
-   strncpy(psk,&a,1);                //storing special character " for wpa_supplicant formating
-   strncpy(psk+1,p,token-p);
-   strncpy(psk+(token-p)+1,&a,1);  //storing special character " for wpa_supplicant formating  
-   psk[(token-p)+2]='\0';
+    p=str_map(token, s1);
+    token = strchr(p,'&');
+    strncpy(psk, &a, 1);                    //storing special character " for wpa_supplicant formating
+    strncpy(psk+1, p, token-p);
+    strncpy(psk+(token-p)+1, &a, 1);        //storing special character " for wpa_supplicant formating
+    psk[(token-p)+2]='\0';
 
-   printf( " psk=%s\n", psk );
-   p=str_map(token, s2);
-  // printf( " p=%s\n", p );
-   //token = strchr(p,'&');     
-   strcpy(dev,p);
-   dev[strlen(dev)]='\0';
+    printf( " psk=%s\n", psk );
 
-   printf( " dev=%s\n", dev );
-  
-  update_wpa_supp(ssid,psk);
-  update_start_script();  
+    p=str_map(token, s2);
+    token = strchr(p,'&');
+    strncpy(dhcp, &a, 1);                   //storing special character " for wpa_supplicant formating
+    strncpy(dhcp+1, p, token-p);
+    strncpy(dhcp+(token-p)+1, &a, 1);       //storing special character " for wpa_supplicant formating
+    dhcp[(token-p)+2]='\0';
 
-  reboot_system();
+    printf( " dhcp=%s\n", dhcp );
+
+    p=str_map(token, s3);
+    token = strchr(p,'&');
+    strncpy(ipaddress, &a, 1);              //storing special character " for wpa_supplicant formating
+    strncpy(ipaddress+1, p, token-p);
+    strncpy(ipaddress+(token-p)+1, &a, 1);  //storing special character " for wpa_supplicant formating
+    ipaddress[(token-p)+2]='\0';
+
+    printf( " ipaddress=%s\n", ipaddress );
+
+    p=str_map(token, s4);
+    token = strchr(p,'&');
+    strncpy(netmask, &a, 1);                //storing special character " for wpa_supplicant formating
+    strncpy(netmask+1, p, token-p);
+    strncpy(netmask+(token-p)+1, &a, 1);    //storing special character " for wpa_supplicant formating
+    netmask[(token-p)+2]='\0';
+
+    printf( " netmask=%s\n", netmask );
+
+    p=str_map(token, s5);
+    token = strchr(p,'&');
+    strcpy(gateway,p);
+    gateway[strlen(gateway)]='\0';
+
+    printf( " gateway=%s\n", gateway );
+
+
+    update_wpa_supp(ssid, psk);
+    update_start_script();
+
+    reboot_system();
 
 }
+
+#ifdef TEST
+void main() {
+	CommandParser("connect=connect&ssid=FASTWEB&password=topsecret&dhcp=checked&ipaddress=192.168.1.1&netmask=255.255.255.0&gateway=192.168.1.0;");
+}
+#endif
 
